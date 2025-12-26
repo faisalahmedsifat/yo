@@ -1,312 +1,282 @@
-# yo CLI
+# yo
 
-A productivity CLI that enforces the **RED/YELLOW/GREEN** framework through observation, tracking, and helpful nudges.
-
-```
-🔴 RED LIGHT    → Define the problem before coding
-🟡 YELLOW LIGHT → Analyze and plan your solution  
-🟢 GREEN LIGHT  → Execute with a timer
-```
-
-## Quick Start
-
-```bash
-# Build and install
-make build
-./yo init
-
-# Start a task
-yo red -i      # Define the problem (interactive)
-yo yellow -i   # Analyze and plan
-yo go --time 2h   # Start execution
-
-# Track progress
-yo status      # Current state
-yo timer       # Timer only
-
-# Complete
-yo done        # Mark task complete
-yo off         # End session
-```
-
----
-
-## System Architecture
+**Stop coding before you think.** `yo` is a CLI that enforces the RED/YELLOW/GREEN framework to help you solve problems methodically.
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                           yo CLI                                     │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────┐  ┌───────────┐  │
-│  │   Commands   │  │  File Watch  │  │   Timer   │  │  Activity │  │
-│  │   (Cobra)    │  │  (fsnotify)  │  │           │  │    Log    │  │
-│  └──────┬───────┘  └──────┬───────┘  └─────┬─────┘  └─────┬─────┘  │
-│         │                 │                │              │         │
-│         └─────────────────┴────────────────┴──────────────┘         │
-│                                    │                                 │
-│                        ┌───────────▼───────────┐                    │
-│                        │    State Manager      │                    │
-│                        │   (JSON + JSONL)      │                    │
-│                        └───────────┬───────────┘                    │
-│                                    │                                 │
-│         ┌──────────────────────────┼──────────────────────────┐     │
-│         │                          │                          │     │
-│  ┌──────▼──────┐  ┌───────────────▼───────────────┐  ┌───────▼───┐ │
-│  │  Project    │  │       Global Daemon           │  │  Stats &  │ │
-│  │  .yo/       │  │       ~/.yo/                  │  │  Reports  │ │
-│  │             │  │                               │  │           │ │
-│  │ state.json  │  │  watcher_config.json          │  │ stats/    │ │
-│  │ activity.   │  │  watcher.pid                  │  │ sessions/ │ │
-│  │   jsonl     │  │                               │  │           │ │
-│  └─────────────┘  └───────────────────────────────┘  └───────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
+🔴 RED    → What's the problem? (Don't touch code yet)
+🟡 YELLOW → What's the plan? (Think before you type)
+🟢 GREEN  → Execute with a timer
 ```
 
-### Directory Structure
+## Why yo?
 
-```
-Project Directory            Global (~/.yo/)
-├── .yo/                     ├── watcher_config.json  # Watch dirs, current project
-│   ├── current_task.md      ├── watcher.pid          # Daemon PID
-│   ├── backlog.md           
-│   ├── tech_debt_log.md     
-│   ├── state.json           
-│   ├── config.json          
-│   ├── activity.jsonl       
-│   ├── done/                
-│   │   └── 2024-12-27_task.md
-│   ├── sessions/            
-│   │   └── 2024-12-27_session.json
-│   └── stats/               
-│       └── 2024-week-52.json
-```
+**The problem:** You see a bug, jump into code, realize 2 hours later you solved the wrong thing.
 
-### File Watcher Architecture
+**The solution:** Force yourself to define the problem and plan before coding. Track your time. Log what you're deferring.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                  Global Watcher Daemon                       │
-│                  (single process for all projects)           │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   watch_dirs: [~/Dev, ~/work]                               │
-│                     │                                        │
-│   ┌─────────────────▼─────────────────┐                     │
-│   │        Git Repo Discovery          │                     │
-│   │   (finds all .git directories)     │                     │
-│   └─────────────────┬─────────────────┘                     │
-│                     │                                        │
-│   ┌─────────────────▼─────────────────┐                     │
-│   │      fsnotify Watchers             │                     │
-│   │  (watches all repos recursively)   │                     │
-│   └─────────────────┬─────────────────┘                     │
-│                     │                                        │
-│   ┌─────────────────▼─────────────────┐                     │
-│   │      Event Handler                 │                     │
-│   │  - Debounce (1 sec)                │                     │
-│   │  - Find repo for file              │                     │
-│   │  - Check if current task repo      │                     │
-│   │  - Log to activity.jsonl           │                     │
-│   └─────────────────┬─────────────────┘                     │
-│                     │                                        │
-│   Active Project: ~/Dev/myapp/.yo/activity.jsonl            │
-│   Logs: {"repo": "~/Dev/other", "untracked": true}          │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Commands
-
-### Setup
-```bash
-yo init              # Create .yo/ workspace
-yo version           # Show version info
-yo status            # Current state, timer, session
-```
-
-### Workflow (RED → YELLOW → GREEN)
-```bash
-yo red [-i]          # Define problem (-i for interactive)
-yo verify red        # Validate RED complete
-yo yellow [-i]       # Analyze and plan
-yo verify yellow     # Validate YELLOW complete
-yo go [--time 4h]    # Start GREEN + timer
-```
-
-### Timer
-```bash
-yo timer             # Show elapsed / threshold
-yo extend 1h "reason" # Add time to threshold
-```
-
-### Completion
-```bash
-yo done              # Complete task (verify criteria)
-yo off               # End work session
-yo next              # Pick next task from backlog
-```
-
-### File Watcher
-```bash
-yo watch             # Start in foreground
-yo watch --bg        # Start in background
-yo watch stop        # Stop daemon
-yo watch status      # Check if running
-```
-
-### Activity & Focus
-```bash
-yo activity          # Today's activity
-yo activity --week   # This week
-yo focus             # Focus score
-```
-
-### Backlog
-```bash
-yo list              # Show backlog
-yo list --p0         # P0 items only
-yo add "description" # Add item
-yo add -i            # Interactive add
-```
-
-### Emergency
-```bash
-yo bypass "reason"   # Skip framework (tracked, limited)
-```
-
-### Analytics
-```bash
-yo stats             # Weekly stats
-yo stats --week 2024-12-20
-yo milestone         # Milestone progress
-yo milestone complete
-```
-
-### Configuration
-```bash
-yo config list       # Show config
-yo config set editor vim
-yo config get editor
-```
-
----
-
-## The RED/YELLOW/GREEN Framework
-
-### 🔴 RED LIGHT - Problem Definition
-**Before writing code, define:**
-- What is the problem?
-- What is the impact?
-- What is the severity (P0-P3)?
-
-### 🟡 YELLOW LIGHT - Analysis & Planning
-**Before implementing, plan:**
-- Root cause analysis (3 levels deep)
-- 3+ solution options with time estimates
-- Decision with rationale
-- Success criteria (minimum 2)
-
-### 🟢 GREEN LIGHT - Execution
-**Now code with:**
-- Timer running (count-up from 0)
-- Focus tracking (via file watcher)
-- Threshold notifications (100%, 150%, 200%)
+**yo enforces this by:**
+- Blocking you from "starting work" until you've defined the problem
+- Making you consider 3 options before picking one
+- Timing your execution phase
+- Tracking tech debt (shortcuts you consciously choose)
 
 ---
 
 ## Installation
 
-### From Source
 ```bash
-git clone https://github.com/faisal/yo.git
+git clone https://github.com/faisalahmedsifat/yo.git
 cd yo
-make build
-make install  # Installs to $GOPATH/bin
-```
-
-### Cross-Platform Builds
-```bash
-make build-all  # Builds for linux, darwin (amd64, arm64)
+go install
 ```
 
 ---
 
-## Testing
+## Complete Workflow
+
+### 1. Initialize a workspace
 
 ```bash
-# All tests
-make test
-
-# Unit tests only
-make test-unit
-
-# Integration tests
-make test-integration
-
-# With coverage
-go test ./... -cover
+cd your-project
+yo init
 ```
 
-### Test Coverage
-| Package | Coverage |
-|---------|----------|
-| internal/activity | 72.3% |
-| internal/state | 68.9% |
-| internal/task | 56.1% |
+Creates `.yo/` with:
+- `current_task.md` - Your RED/YELLOW/GREEN task
+- `backlog.md` - Prioritized task list
+- `tech_debt_log.md` - Conscious shortcuts you're taking
+
+### 2. Manage your backlog
+
+```bash
+# Add tasks
+yo add "Fix login button on mobile"
+yo add -i                    # Interactive (choose priority)
+
+# View backlog
+yo list                      # All items
+yo list --p0                 # P0 (launch blockers) only
+
+# Pick next task → starts RED LIGHT
+yo next
+```
+
+### 3. RED LIGHT - Define the problem
+
+```bash
+yo red -i     # Interactive mode (recommended)
+```
+
+**You must answer:**
+- What's the problem?
+- What's the impact?
+- What's the severity (P0-P3)?
+
+```bash
+yo verify red   # Check if complete
+```
+
+### 4. YELLOW LIGHT - Plan your solution
+
+```bash
+yo yellow -i   # Interactive mode
+```
+
+**You must define:**
+- Root cause (3 levels deep - immediate, underlying, system)
+- 3 solution options with time estimates
+- Your decision and why
+- Success criteria
+
+**Log tech debt here:**
+```bash
+yo defer "No OAuth - using password only for MVP"
+yo defer -i   # Interactive with more details
+```
+
+```bash
+yo verify yellow   # Check if complete
+```
+
+### 5. GREEN LIGHT - Execute
+
+```bash
+yo go                # Uses estimated time from YELLOW
+yo go --time 2h      # Override time estimate
+```
+
+**Now you can code.** Timer is running.
+
+```bash
+yo status   # Current state + timer
+yo timer    # Timer only
+
+# Need more time?
+yo extend 30m "API was more complex"
+```
+
+### 6. Complete the task
+
+```bash
+yo done
+```
+
+Prompts you to verify success criteria were met. Archives the task.
+
+### 7. End your session
+
+```bash
+yo off   # Ends session, shows focus score
+```
+
+---
+
+## Tech Debt Tracking
+
+Tech debt is **not** timer extensions. Tech debt is **conscious decisions to defer work**.
+
+Use `yo defer` during YELLOW LIGHT when you're choosing to skip something:
+
+```bash
+yo defer "No retry button - users can click again"
+yo defer -i   # Interactive mode
+```
+
+**Creates entries like:**
+```markdown
+## Deferred on 2024-12-27
+**Task:** deploy_feature
+
+**What:** No retry button
+**Why skipped:** Users can click deploy again, not critical
+**Come back when:** When user complains
+**Estimated fix time:** 2h
+```
+
+View with: `cat .yo/tech_debt_log.md`
+
+---
+
+## Emergency Bypass
+
+Sometimes you need to skip the framework:
+
+```bash
+yo bypass "production is down"
+```
+
+**Limited to:** 1/day, 5/week. Tracked for accountability.
+
+---
+
+## Activity & Stats
+
+```bash
+yo activity          # Today's changes
+yo activity --week   # This week
+
+yo focus             # Focus score (on-task vs off-task)
+yo stats             # Weekly statistics
+yo milestone         # Track your progress
+```
+
+---
+
+## File Watcher (Optional)
+
+Track file changes across repos:
+
+```bash
+yo watch             # Foreground
+yo watch --bg        # Background daemon
+yo watch stop        # Stop daemon
+yo watch status      # Check if running
+```
+
+Logs when you're working on the wrong repo (off-task activity).
+
+---
+
+## All Commands
+
+| Command | Description |
+|---------|-------------|
+| `yo init` | Initialize workspace |
+| `yo status` | Show current state |
+| `yo red -i` | Define problem (interactive) |
+| `yo yellow -i` | Plan solution (interactive) |
+| `yo go` | Start GREEN LIGHT with timer |
+| `yo timer` | Show timer |
+| `yo extend 1h` | Add time to threshold |
+| `yo done` | Complete task |
+| `yo off` | End session |
+| `yo list` | Show backlog |
+| `yo add "task"` | Add to backlog |
+| `yo next` | Pick next task |
+| `yo defer "what"` | Log tech debt |
+| `yo bypass "why"` | Emergency skip |
+| `yo activity` | Show activity |
+| `yo focus` | Show focus score |
+| `yo stats` | Weekly stats |
+| `yo milestone` | Progress milestones |
+| `yo config list` | Show config |
+| `yo watch` | Start file watcher |
 
 ---
 
 ## Configuration
 
-### Project Config (`.yo/config.json`)
-```json
-{
-  "watch_dirs": ["~/Dev"],
-  "notifications": true,
-  "editor": "vim",
-  "max_bypass_day": 1,
-  "max_bypass_week": 5
-}
+```bash
+yo config list              # Show all settings
+yo config set editor vim    # Set editor
+yo config get editor        # Get value
 ```
 
-### Global Watcher Config (`~/.yo/watcher_config.json`)
-```json
-{
-  "watch_dirs": ["~/Dev", "~/work"],
-  "current_dir": "/home/user/Dev/myapp"
-}
+Settings in `.yo/config.json`:
+- `notifications` - Desktop notifications (true/false)
+- `editor` - Editor for opening files
+- `max_bypass_day` - Bypass limit per day (default: 1)
+- `max_bypass_week` - Bypass limit per week (default: 5)
+
+---
+
+## Directory Structure
+
+```
+your-project/
+└── .yo/
+    ├── current_task.md    # Current RED/YELLOW/GREEN task
+    ├── backlog.md         # Prioritized backlog
+    ├── tech_debt_log.md   # Conscious shortcuts
+    ├── state.json         # Timer, stage, session
+    ├── config.json        # Settings
+    ├── activity.jsonl     # Activity log
+    ├── done/              # Archived completed tasks
+    ├── sessions/          # Session summaries
+    └── stats/             # Weekly statistics
 ```
 
 ---
 
-## State Files
+## The Framework Mindset
 
-### `state.json`
-```json
-{
-  "version": "1.0.0",
-  "current_stage": "green",
-  "current_task_id": "deploy_button",
-  "timer": {
-    "started_at": "2024-12-27T14:30:00Z",
-    "estimated_hours": 4.0,
-    "threshold_hours": 5.0,
-    "extensions": [{"hours": 1.0, "reason": "API complex"}]
-  },
-  "session": {"active": true, "started_at": "..."},
-  "emergency_bypasses": {"today": 0, "this_week": 1}
-}
-```
+### Before yo:
+1. See bug
+2. Jump into code
+3. Realize 2 hours later you fixed the wrong thing
+4. Feel bad
 
-### `activity.jsonl`
-```jsonl
-{"ts":"...","type":"stage_change","from":"yellow","to":"green","task":"deploy"}
-{"ts":"...","type":"file_change","repo":"~/Dev/app","file":"main.go"}
-{"ts":"...","type":"task_complete","task":"deploy","actual_hours":4.5}
-```
+### After yo:
+1. See bug → `yo red -i`
+2. Define exact problem, impact, severity
+3. Analyze root cause → `yo yellow -i`  
+4. Consider 3 options, pick one, define success criteria
+5. Log what you're skipping → `yo defer`
+6. Start timer → `yo go`
+7. Code with focus
+8. Verify success criteria → `yo done`
+
+**The few minutes spent planning save hours of wasted work.**
 
 ---
 

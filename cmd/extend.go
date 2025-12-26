@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/faisal/yo/internal/state"
@@ -15,6 +14,9 @@ var extendCmd = &cobra.Command{
 	Use:   "extend <duration> [reason]",
 	Short: "Extend the timer threshold",
 	Long: `Add more time to the current threshold.
+
+This does NOT create tech debt - it's just adjusting your estimate.
+Use 'yo defer' to log conscious decisions to defer work.
 
 Examples:
   yo extend 1h "API more complex than expected"
@@ -67,32 +69,12 @@ Examples:
 		fmt.Printf("  Total extensions: %d\n", len(s.Timer.Extensions))
 		fmt.Println()
 
-		// Log to tech debt log if over original estimate
-		if len(s.Timer.Extensions) > 0 {
-			fmt.Println("  💡 Extension logged to tech_debt_log.md")
-			logExtension(s.CurrentTaskID, duration, reason)
-		}
+		// Tip about tech debt
+		fmt.Println("  💡 Tip: If you're skipping work to ship faster, log it:")
+		fmt.Println("     yo defer -i")
 
 		return nil
 	},
-}
-
-func logExtension(taskID string, hours float64, reason string) {
-	techDebtPath, err := workspace.GetTechDebtPath()
-	if err != nil {
-		return
-	}
-
-	entry := fmt.Sprintf("\n## %s - Timer Extension\n- Added: %s\n- Reason: %s\n",
-		taskID, timer.FormatHours(hours), reason)
-
-	// Append to file using os package directly
-	f, err := os.OpenFile(techDebtPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	f.WriteString(entry)
 }
 
 func init() {

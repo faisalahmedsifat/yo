@@ -59,6 +59,11 @@ const CurrentTask = `# Current Task
 **Chosen option:** 
 **Reason:**
 
+### What I'm Deferring (Tech Debt)
+<!-- Things you know should be done but are choosing to skip for now -->
+<!-- Use 'yo defer -i' to log these properly, or list them here: -->
+- 
+
 ### Implementation Steps
 1. 
 2. 
@@ -110,7 +115,10 @@ const Backlog = `# Backlog
 // TechDebtLog is the template for .yo/tech_debt_log.md
 const TechDebtLog = `# Tech Debt Log
 
-Track deferred decisions and shortcuts for later cleanup.
+Tech debt = shortcuts you CHOSE to take to ship faster.
+Log decisions you're consciously deferring during YELLOW LIGHT.
+
+Use: yo defer -i
 
 ---
 

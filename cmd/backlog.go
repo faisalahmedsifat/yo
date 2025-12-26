@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/faisal/yo/internal/backlog"
+	"github.com/faisal/yo/internal/state"
 	"github.com/faisal/yo/internal/workspace"
 	"github.com/spf13/cobra"
 )
@@ -175,20 +176,32 @@ Examples:
 
 var nextCmd = &cobra.Command{
 	Use:   "next",
-	Short: "Pick next task from backlog",
-	Long:  `Select and start the next task from your backlog, prioritizing P0 items.`,
+	Short: "Pick next task from backlog and start RED LIGHT",
+	Long:  `Select the next task from your backlog (prioritizing P0 items) and start RED LIGHT.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !workspace.IsInitialized() {
 			return fmt.Errorf("workspace not initialized. Run 'yo init' first")
 		}
 
-		b, err := backlog.Load()
+		s, err := state.Load()
+		if err != nil {
+			return err
+		}
+
+		// Check if already in a task
+		if s.CurrentStage != "none" && s.CurrentStage != "" {
+			fmt.Printf("⚠️  Already in %s stage with task: %s\n", strings.ToUpper(s.CurrentStage), s.CurrentTaskID)
+			fmt.Println("   Complete current task first with 'yo done' or 'yo off'")
+			return nil
+		}
+
+		bl, err := backlog.Load()
 		if err != nil {
 			return err
 		}
 
 		// Get unchecked items using backlog package
-		available := b.GetUnchecked()
+		available := bl.GetUnchecked()
 
 		if len(available) == 0 {
 			fmt.Println("🎉 Backlog is empty! Add items with: yo add \"description\"")
@@ -221,18 +234,62 @@ var nextCmd = &cobra.Command{
 		}
 
 		selected := available[choice-1]
-		fmt.Println()
-		fmt.Printf("✅ Selected: %s\n", selected.Text)
-		fmt.Println()
-		fmt.Print("Start RED LIGHT now? (y/n): ")
 
-		response, _ = reader.ReadString('\n')
-		if strings.TrimSpace(strings.ToLower(response)) == "y" {
-			fmt.Println("  Starting: yo red -i")
+		// Generate task ID from description
+		taskID := sanitizeForTaskID(selected.Text)
+
+		// Update current_task.md with the problem from backlog
+		taskPath, err := workspace.GetCurrentTaskPath()
+		if err != nil {
+			return err
 		}
+		content, err := os.ReadFile(taskPath)
+		if err != nil {
+			return err
+		}
+		text := string(content)
+		text = strings.Replace(text, "<!-- Describe the problem clearly -->", selected.Text, 1)
+		os.WriteFile(taskPath, []byte(text), 0644)
+
+		// Update state to RED LIGHT
+		s.SetStage("red")
+		s.CurrentTaskID = taskID
+		if err := s.Save(); err != nil {
+			return err
+		}
+
+		fmt.Println()
+		fmt.Println("🔴 RED LIGHT Started!")
+		fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+		fmt.Printf("  Task: %s\n", selected.Text)
+		fmt.Printf("  ID:   %s\n", taskID)
+		fmt.Printf("  From: %s\n", selected.Priority)
+		fmt.Println()
+		fmt.Println("  The problem has been added to current_task.md")
+		fmt.Println()
+		fmt.Println("  Next steps:")
+		fmt.Println("    1. Edit .yo/current_task.md to complete RED LIGHT")
+		fmt.Println("    2. Or run: yo red -i  (interactive mode)")
+		fmt.Println("    3. Then: yo yellow -i  (plan your solution)")
 
 		return nil
 	},
+}
+
+func sanitizeForTaskID(s string) string {
+	s = strings.ToLower(s)
+	s = strings.ReplaceAll(s, " ", "_")
+	var result strings.Builder
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_' {
+			result.WriteRune(r)
+		}
+	}
+	id := result.String()
+	if len(id) > 30 {
+		id = id[:30]
+	}
+	return id
 }
 
 func init() {
