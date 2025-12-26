@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strings"
@@ -94,8 +95,9 @@ Use --time to override the estimated time.`,
 			if err != nil {
 				fmt.Println("⚠️  No time estimate found in task.")
 				fmt.Print("   Enter time estimate (e.g., 2h, 1.5h): ")
-				var timeStr string
-				fmt.Scanln(&timeStr)
+				reader := bufio.NewReader(os.Stdin)
+				timeStr, _ := reader.ReadString('\n')
+				timeStr = strings.TrimSpace(timeStr)
 				estimatedHours, err = timer.ParseDuration(timeStr)
 				if err != nil || estimatedHours == 0 {
 					return fmt.Errorf("invalid time format")

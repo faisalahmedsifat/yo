@@ -104,6 +104,23 @@ func FormatDuration(d time.Duration) string {
 	return fmt.Sprintf("%dm", m)
 }
 
+// FormatDurationWithSeconds formats a duration as "Xh Ym Zs" for live display
+func FormatDurationWithSeconds(d time.Duration) string {
+	d = d.Round(time.Second)
+	h := d / time.Hour
+	d -= h * time.Hour
+	m := d / time.Minute
+	d -= m * time.Minute
+	s := d / time.Second
+	if h > 0 {
+		return fmt.Sprintf("%dh %dm %ds", h, m, s)
+	}
+	if m > 0 {
+		return fmt.Sprintf("%dm %ds", m, s)
+	}
+	return fmt.Sprintf("%ds", s)
+}
+
 // FormatHours formats hours as "Xh Ym"
 func FormatHours(h float64) string {
 	hours := int(h)

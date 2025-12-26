@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -38,17 +39,47 @@ Use -e to open the editor directly.`,
 			return err
 		}
 
-		// Check if already in a task
+		taskPath, err := workspace.GetCurrentTaskPath()
+		if err != nil {
+			return err
+		}
+
+		// Check if already in RED stage (e.g., from yo next)
+		if s.CurrentStage == "red" {
+			fmt.Printf("⚠️  Already in RED stage for: %s\n", s.CurrentTaskID)
+			fmt.Println()
+			fmt.Println("  [1] Continue - Fill in missing impact/severity")
+			fmt.Println("  [2] Start new - Begin fresh RED LIGHT")
+			fmt.Println("  [q] Cancel")
+			fmt.Print("> ")
+
+			reader := bufio.NewReader(os.Stdin)
+			response, _ := reader.ReadString('\n')
+			response = strings.TrimSpace(response)
+
+			switch response {
+			case "1":
+				// Get existing problem from task file
+				content, _ := os.ReadFile(taskPath)
+				problem := extractProblem(string(content))
+				if problem == "" {
+					problem = s.CurrentTaskID
+				}
+				return runRedContinue(taskPath, s, problem)
+			case "2":
+				// Start fresh
+				return runRedInteractive(taskPath, s)
+			default:
+				return nil
+			}
+		}
+
+		// Check if in other stages
 		if s.CurrentStage != "none" && s.CurrentStage != "" {
 			fmt.Printf("⚠️  Already in %s stage.\n", strings.ToUpper(s.CurrentStage))
 			if !promptConfirm("Start a new RED LIGHT anyway?") {
 				return nil
 			}
-		}
-
-		taskPath, err := workspace.GetCurrentTaskPath()
-		if err != nil {
-			return err
 		}
 
 		if redEdit {
@@ -179,7 +210,7 @@ func runRedInteractive(taskPath string, s *state.State) error {
 	fmt.Println()
 	fmt.Println("✅ RED LIGHT complete!")
 	fmt.Printf("   Task ID: %s\n", taskID)
-	fmt.Println("   Next: yo yellow -i  (analyze and plan)")
+	fmt.Println("   Next: yo yellow  (analyze and plan)")
 	return nil
 }
 
@@ -200,8 +231,8 @@ func openEditor(filepath string) error {
 }
 
 func readLine() string {
-	var line string
-	fmt.Scanln(&line)
+	reader := bufio.NewReader(os.Stdin)
+	line, _ := reader.ReadString('\n')
 	return strings.TrimSpace(line)
 }
 
@@ -237,6 +268,99 @@ func sanitizeTaskID(s string) string {
 
 func promptConfirm(question string) bool {
 	return task.PromptConfirm(question)
+}
+
+// extractProblem extracts the problem description from task file
+func extractProblem(text string) string {
+	if idx := strings.Index(text, "### What's the Problem?"); idx != -1 {
+		endIdx := strings.Index(text[idx:], "### Impact")
+		if endIdx != -1 {
+			problem := strings.TrimSpace(text[idx+len("### What's the Problem?") : idx+endIdx])
+			problem = strings.TrimPrefix(problem, "<!-- Describe the problem clearly -->")
+			return strings.TrimSpace(problem)
+		}
+	}
+	return ""
+}
+
+// runRedContinue fills in impact/severity for an existing problem (from yo next)
+func runRedContinue(taskPath string, s *state.State, problem string) error {
+	fmt.Println()
+	fmt.Println("🔴 Continue RED LIGHT")
+	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+	fmt.Printf("  Problem: %s\n", problem)
+	fmt.Println()
+
+	reader := bufio.NewReader(os.Stdin)
+
+	// Impact
+	fmt.Println("What's the impact? (enter numbers, comma-separated)")
+	fmt.Println("  1. Blocks launch")
+	fmt.Println("  2. Blocks paying users")
+	fmt.Println("  3. Causes user frustration")
+	fmt.Println("  4. Tech debt accumulation")
+	fmt.Println("  5. Other")
+	fmt.Print("> ")
+	impactStr, _ := reader.ReadString('\n')
+	impacts := parseNumbers(strings.TrimSpace(impactStr))
+
+	// Severity
+	fmt.Println()
+	fmt.Println("Severity?")
+	fmt.Println("  0. P0 - Launch blocker")
+	fmt.Println("  1. P1 - Paying user blocker")
+	fmt.Println("  2. P2 - Nice to have")
+	fmt.Println("  3. P3 - Future improvement")
+	fmt.Print("> ")
+	severityStr, _ := reader.ReadString('\n')
+	var severity int
+	fmt.Sscanf(strings.TrimSpace(severityStr), "%d", &severity)
+
+	// Read and update current task file
+	content, err := os.ReadFile(taskPath)
+	if err != nil {
+		return err
+	}
+	text := string(content)
+
+	// Update impact checkboxes
+	impactMap := map[int]string{
+		1: "Blocks launch",
+		2: "Blocks paying users",
+		3: "Causes user frustration",
+		4: "Tech debt accumulation",
+		5: "Other",
+	}
+	for _, i := range impacts {
+		if label, ok := impactMap[i]; ok {
+			text = strings.Replace(text, "- [ ] "+label, "- [x] "+label, 1)
+		}
+	}
+
+	// Update severity
+	severities := []string{
+		"P0 - Launch blocker",
+		"P1 - Paying user blocker",
+		"P2 - Nice to have",
+		"P3 - Future improvement",
+	}
+	if severity >= 0 && severity < len(severities) {
+		text = strings.Replace(text, "- [ ] "+severities[severity], "- [x] "+severities[severity], 1)
+	}
+
+	if err := os.WriteFile(taskPath, []byte(text), 0644); err != nil {
+		return err
+	}
+
+	// Log activity
+	activity.LogStageChange("red", "red", s.CurrentTaskID)
+
+	fmt.Println()
+	fmt.Println("✅ RED LIGHT complete!")
+	fmt.Printf("   Task ID: %s\n", s.CurrentTaskID)
+	fmt.Println("   Next: yo yellow  (analyze and plan)")
+
+	return nil
 }
 
 func init() {

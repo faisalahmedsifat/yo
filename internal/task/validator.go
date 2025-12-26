@@ -133,13 +133,13 @@ func ValidateYellow(filepath string) (*ValidationResult, error) {
 		}
 	}
 
-	// Check for success criteria (at least 2)
+	// Check for success criteria (at least 1)
 	successChecked := countAllBoxes(yellowSection, "### Success Criteria", "---")
-	if successChecked < 2 {
+	if successChecked < 1 {
 		result.Valid = false
 		result.Errors = append(result.Errors, ValidationError{
 			Field:   "Success Criteria",
-			Message: fmt.Sprintf("need at least 2 success criteria, found %d", successChecked),
+			Message: fmt.Sprintf("need at least 1 success criterion, found %d", successChecked),
 		})
 	}
 
@@ -180,22 +180,40 @@ func GetTimeEstimate(filepath string) (float64, error) {
 
 	text := string(content)
 
-	// Look for "Time estimate:" patterns in the chosen option
-	timeRe := regexp.MustCompile(`[Tt]ime\s*estimate[:\s]+(\d+(?:\.\d+)?)\s*h`)
-	matches := timeRe.FindStringSubmatch(text)
+	// Look for "Time estimate:" patterns with hours
+	timeReH := regexp.MustCompile(`[Tt]ime\s*estimate[:\s]+(\d+(?:\.\d+)?)\s*h`)
+	matches := timeReH.FindStringSubmatch(text)
 	if len(matches) > 1 {
 		var hours float64
 		fmt.Sscanf(matches[1], "%f", &hours)
 		return hours, nil
 	}
 
-	// Also try "Xh" format
+	// Look for "Time estimate:" patterns with minutes
+	timeReM := regexp.MustCompile(`[Tt]ime\s*estimate[:\s]+(\d+(?:\.\d+)?)\s*m`)
+	matches = timeReM.FindStringSubmatch(text)
+	if len(matches) > 1 {
+		var minutes float64
+		fmt.Sscanf(matches[1], "%f", &minutes)
+		return minutes / 60, nil
+	}
+
+	// Try standalone "Xh" format
 	hoursRe := regexp.MustCompile(`(\d+(?:\.\d+)?)\s*(?:hours?|h)\b`)
 	matches = hoursRe.FindStringSubmatch(text)
 	if len(matches) > 1 {
 		var hours float64
 		fmt.Sscanf(matches[1], "%f", &hours)
 		return hours, nil
+	}
+
+	// Try standalone "Xm" format
+	minsRe := regexp.MustCompile(`(\d+(?:\.\d+)?)\s*m\b`)
+	matches = minsRe.FindStringSubmatch(text)
+	if len(matches) > 1 {
+		var minutes float64
+		fmt.Sscanf(matches[1], "%f", &minutes)
+		return minutes / 60, nil
 	}
 
 	return 0, fmt.Errorf("no time estimate found")

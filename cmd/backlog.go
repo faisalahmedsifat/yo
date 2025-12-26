@@ -265,12 +265,19 @@ var nextCmd = &cobra.Command{
 		fmt.Printf("  ID:   %s\n", taskID)
 		fmt.Printf("  From: %s\n", selected.Priority)
 		fmt.Println()
-		fmt.Println("  The problem has been added to current_task.md")
+
+		// Ask if user wants to continue interactively
+		fmt.Print("Fill in impact/severity now? (y/n): ")
+		response, _ = reader.ReadString('\n')
+		if strings.TrimSpace(strings.ToLower(response)) == "y" {
+			// Run impact and severity prompts only
+			return runRedContinue(taskPath, s, selected.Text)
+		}
+
 		fmt.Println()
 		fmt.Println("  Next steps:")
-		fmt.Println("    1. Edit .yo/current_task.md to complete RED LIGHT")
-		fmt.Println("    2. Or run: yo red  (interactive mode)")
-		fmt.Println("    3. Then: yo yellow  (plan your solution)")
+		fmt.Println("    yo red    - Fill in impact/severity")
+		fmt.Println("    yo yellow - Plan your solution")
 
 		return nil
 	},

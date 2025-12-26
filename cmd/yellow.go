@@ -88,6 +88,30 @@ func runYellowInteractive(taskPath string, s *state.State) error {
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 	fmt.Println()
 
+	// Show RED LIGHT context
+	content, err := os.ReadFile(taskPath)
+	if err == nil {
+		text := string(content)
+
+		// Extract problem from task file
+		if idx := strings.Index(text, "### What's the Problem?"); idx != -1 {
+			endIdx := strings.Index(text[idx:], "### Impact")
+			if endIdx != -1 {
+				problem := strings.TrimSpace(text[idx+len("### What's the Problem?") : idx+endIdx])
+				problem = strings.TrimPrefix(problem, "<!-- Describe the problem clearly -->")
+				problem = strings.TrimSpace(problem)
+				if problem != "" {
+					fmt.Println("📋 From RED LIGHT:")
+					fmt.Printf("   Problem: %s\n", problem)
+					fmt.Printf("   Task ID: %s\n", s.CurrentTaskID)
+					fmt.Println()
+					fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+					fmt.Println()
+				}
+			}
+		}
+	}
+
 	reader := bufio.NewReader(os.Stdin)
 
 	// Root cause analysis
@@ -187,12 +211,12 @@ func runYellowInteractive(taskPath string, s *state.State) error {
 		criteria = append(criteria, criterion)
 	}
 
-	if len(criteria) < 2 {
-		return fmt.Errorf("need at least 2 success criteria")
+	if len(criteria) < 1 {
+		return fmt.Errorf("need at least 1 success criterion")
 	}
 
 	// Read and update template
-	content, err := os.ReadFile(taskPath)
+	content, err = os.ReadFile(taskPath)
 	if err != nil {
 		return err
 	}

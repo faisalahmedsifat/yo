@@ -377,3 +377,80 @@ func getProjectRoot(t *testing.T) string {
 
 	return root
 }
+
+// TestInteractiveInputWithSpaces verifies that interactive commands handle multi-word input
+func TestInteractiveInputWithSpaces(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "yo-input-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	yoBinary := filepath.Join(tmpDir, "yo")
+	buildCmd := exec.Command("go", "build", "-o", yoBinary, ".")
+	buildCmd.Dir = getProjectRoot(t)
+	if output, err := buildCmd.CombinedOutput(); err != nil {
+		t.Fatalf("Failed to build yo: %v\n%s", err, output)
+	}
+
+	// Initialize
+	runYo(t, tmpDir, yoBinary, "init")
+
+	// Test yo defer with multi-word input
+	// yo defer accepts a description with spaces
+	t.Run("defer with spaces", func(t *testing.T) {
+		cmd := exec.Command(yoBinary, "defer", "No OAuth support - using password only for MVP")
+		cmd.Dir = tmpDir
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("defer command failed: %v\n%s", err, output)
+		}
+		if !strings.Contains(string(output), "Tech debt logged") {
+			t.Errorf("Expected 'Tech debt logged', got: %s", output)
+		}
+
+		// Verify tech debt log contains the full text
+		techDebt, err := os.ReadFile(filepath.Join(tmpDir, ".yo", "tech_debt_log.md"))
+		if err != nil {
+			t.Fatalf("Failed to read tech_debt_log.md: %v", err)
+		}
+		if !strings.Contains(string(techDebt), "No OAuth support - using password only for MVP") {
+			t.Errorf("Tech debt log missing full description: %s", techDebt)
+		}
+	})
+
+	// Test yo add with multi-word description
+	t.Run("add with spaces", func(t *testing.T) {
+		cmd := exec.Command(yoBinary, "add", "Fix the login button on mobile Safari")
+		cmd.Dir = tmpDir
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("add command failed: %v\n%s", err, output)
+		}
+		if !strings.Contains(string(output), "Added to") {
+			t.Errorf("Expected 'Added to', got: %s", output)
+		}
+
+		// Verify backlog contains the full text
+		backlog, err := os.ReadFile(filepath.Join(tmpDir, ".yo", "backlog.md"))
+		if err != nil {
+			t.Fatalf("Failed to read backlog.md: %v", err)
+		}
+		if !strings.Contains(string(backlog), "Fix the login button on mobile Safari") {
+			t.Errorf("Backlog missing full description: %s", backlog)
+		}
+	})
+
+	// Test yo bypass with multi-word reason
+	t.Run("bypass with spaces", func(t *testing.T) {
+		cmd := exec.Command(yoBinary, "bypass", "Production is on fire and users are complaining")
+		cmd.Dir = tmpDir
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("bypass command failed: %v\n%s", err, output)
+		}
+		if !strings.Contains(string(output), "BYPASS") {
+			t.Errorf("Expected 'BYPASS', got: %s", output)
+		}
+	})
+}
