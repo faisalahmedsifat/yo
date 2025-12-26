@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faisal/yo/internal/state"
+	"github.com/faisalahmedsifat/yo/internal/state"
 )
 
 func TestGetStatus(t *testing.T) {

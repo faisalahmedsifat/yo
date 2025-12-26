@@ -1,4 +1,4 @@
-module github.com/faisal/yo
+module github.com/faisalahmedsifat/yo
 
 go 1.22.2
 

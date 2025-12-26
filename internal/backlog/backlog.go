@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/faisal/yo/internal/workspace"
+	"github.com/faisalahmedsifat/yo/internal/workspace"
 )
 
 // Priority levels

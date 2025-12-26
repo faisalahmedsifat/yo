@@ -1,7 +1,7 @@
 package milestone
 
 import (
-	"github.com/faisal/yo/internal/state"
+	"github.com/faisalahmedsifat/yo/internal/state"
 )
 
 // Milestone represents a framework milestone

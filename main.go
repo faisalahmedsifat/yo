@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/faisal/yo/cmd"
+	"github.com/faisalahmedsifat/yo/cmd"
 )
 
 func main() {

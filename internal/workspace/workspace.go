@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/faisal/yo/internal/config"
-	"github.com/faisal/yo/internal/state"
-	"github.com/faisal/yo/internal/templates"
+	"github.com/faisalahmedsifat/yo/internal/config"
+	"github.com/faisalahmedsifat/yo/internal/state"
+	"github.com/faisalahmedsifat/yo/internal/templates"
 )
 
 // Init creates the .yo workspace structure

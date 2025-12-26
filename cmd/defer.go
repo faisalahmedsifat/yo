@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/faisal/yo/internal/state"
-	"github.com/faisal/yo/internal/workspace"
+	"github.com/faisalahmedsifat/yo/internal/state"
+	"github.com/faisalahmedsifat/yo/internal/workspace"
 	"github.com/spf13/cobra"
 )
 

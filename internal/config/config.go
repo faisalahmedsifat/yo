@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/faisal/yo/internal/state"
+	"github.com/faisalahmedsifat/yo/internal/state"
 )
 
 // Config represents user configuration

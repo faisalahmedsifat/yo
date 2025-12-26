@@ -6,7 +6,7 @@
 VERSION := 0.1.0
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-LDFLAGS := -ldflags "-X github.com/faisal/yo/cmd.Version=$(VERSION) -X github.com/faisal/yo/cmd.BuildDate=$(BUILD_DATE) -X github.com/faisal/yo/cmd.GitCommit=$(GIT_COMMIT)"
+LDFLAGS := -ldflags "-X github.com/faisalahmedsifat/yo/cmd.Version=$(VERSION) -X github.com/faisalahmedsifat/yo/cmd.BuildDate=$(BUILD_DATE) -X github.com/faisalahmedsifat/yo/cmd.GitCommit=$(GIT_COMMIT)"
 
 # Default target
 all: build

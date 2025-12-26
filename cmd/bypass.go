@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/faisal/yo/internal/activity"
-	"github.com/faisal/yo/internal/config"
-	"github.com/faisal/yo/internal/state"
-	"github.com/faisal/yo/internal/workspace"
+	"github.com/faisalahmedsifat/yo/internal/activity"
+	"github.com/faisalahmedsifat/yo/internal/config"
+	"github.com/faisalahmedsifat/yo/internal/state"
+	"github.com/faisalahmedsifat/yo/internal/workspace"
 	"github.com/spf13/cobra"
 )
 

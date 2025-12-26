@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/faisal/yo/internal/stats"
-	"github.com/faisal/yo/internal/timer"
-	"github.com/faisal/yo/internal/workspace"
+	"github.com/faisalahmedsifat/yo/internal/stats"
+	"github.com/faisalahmedsifat/yo/internal/timer"
+	"github.com/faisalahmedsifat/yo/internal/workspace"
 	"github.com/spf13/cobra"
 )
 

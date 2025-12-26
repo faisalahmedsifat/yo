@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/faisal/yo/internal/activity"
-	"github.com/faisal/yo/internal/state"
+	"github.com/faisalahmedsifat/yo/internal/activity"
+	"github.com/faisalahmedsifat/yo/internal/state"
 )
 
 // Milestones for timer notifications

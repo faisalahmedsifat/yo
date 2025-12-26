@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faisal/yo/internal/activity"
+	"github.com/faisalahmedsifat/yo/internal/activity"
 )
 
 func TestCalculate(t *testing.T) {

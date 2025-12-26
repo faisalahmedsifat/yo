@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/faisal/yo/internal/watcher"
-	"github.com/faisal/yo/internal/workspace"
+	"github.com/faisalahmedsifat/yo/internal/watcher"
+	"github.com/faisalahmedsifat/yo/internal/workspace"
 	"github.com/spf13/cobra"
 )
 

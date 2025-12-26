@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/faisal/yo/internal/task"
-	"github.com/faisal/yo/internal/workspace"
+	"github.com/faisalahmedsifat/yo/internal/task"
+	"github.com/faisalahmedsifat/yo/internal/workspace"
 	"github.com/spf13/cobra"
 )
 

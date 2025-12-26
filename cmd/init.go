@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/faisal/yo/internal/workspace"
+	"github.com/faisalahmedsifat/yo/internal/workspace"
 	"github.com/spf13/cobra"
 )
 
