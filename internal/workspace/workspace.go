@@ -41,6 +41,7 @@ func Init() error {
 		"current_task.md":  templates.CurrentTask,
 		"backlog.md":       templates.Backlog,
 		"tech_debt_log.md": templates.TechDebtLog,
+		"AGENTS.md":        templates.Agents,
 	}
 
 	for name, content := range files {

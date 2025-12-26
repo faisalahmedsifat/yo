@@ -91,10 +91,6 @@ func printStatus(s *state.State) {
 			s.EmergencyBypasses.Today, s.EmergencyBypasses.ThisWeek)
 	}
 
-	// Milestone
-	fmt.Println()
-	fmt.Printf("  Milestone: %d - %s\n", s.Milestone.Current, s.Milestone.Name)
-
 	fmt.Println()
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 

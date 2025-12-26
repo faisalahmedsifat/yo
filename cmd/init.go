@@ -14,6 +14,7 @@ var initCmd = &cobra.Command{
   - current_task.md: The RED/YELLOW/GREEN task template
   - backlog.md: Your prioritized task backlog
   - tech_debt_log.md: Deferred decisions and shortcuts
+  - AGENTS.md: Instructions for AI agents
   - state.json: Current state (stage, timer, etc.)
   - config.json: User configuration
   - activity.jsonl: Activity log (file changes, events)`,
@@ -27,6 +28,7 @@ var initCmd = &cobra.Command{
 		fmt.Println("  📄 current_task.md  - Your RED/YELLOW/GREEN task")
 		fmt.Println("  📋 backlog.md       - Prioritized task list")
 		fmt.Println("  📝 tech_debt_log.md - Deferred decisions")
+		fmt.Println("  🤖 AGENTS.md        - AI agent instructions")
 		fmt.Println("  ⚙️  state.json       - Current state")
 		fmt.Println("  🔧 config.json      - Configuration")
 		fmt.Println("  📊 activity.jsonl   - Activity log")

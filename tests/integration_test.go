@@ -91,14 +91,6 @@ func TestFullWorkflow(t *testing.T) {
 		}
 	})
 
-	// Test: yo milestone
-	t.Run("yo milestone", func(t *testing.T) {
-		output := runYo(t, tmpDir, yoBinary, "milestone")
-		if !strings.Contains(output, "Milestone") {
-			t.Errorf("Expected milestone output, got: %s", output)
-		}
-	})
-
 	// Test: Simulate RED LIGHT by modifying the task file
 	t.Run("simulate RED LIGHT", func(t *testing.T) {
 		taskPath := filepath.Join(tmpDir, ".yo", "current_task.md")
@@ -194,8 +186,7 @@ Test system
   "current_task_id": "test_task",
   "timer": { "estimated_hours": 0, "threshold_hours": 0 },
   "session": { "active": false },
-  "emergency_bypasses": { "today": 0, "this_week": 0, "last_reset": "2024-12-27" },
-  "milestone": { "current": 0, "name": "Clear Launch Blockers" }
+  "emergency_bypasses": { "today": 0, "this_week": 0, "last_reset": "2024-12-27" }
 }`
 		if err := os.WriteFile(statePath, []byte(stateContent), 0644); err != nil {
 			t.Fatalf("Failed to write state file: %v", err)
@@ -228,8 +219,7 @@ Test system
   "current_task_id": "test_task",
   "timer": { "estimated_hours": 0, "threshold_hours": 0 },
   "session": { "active": false },
-  "emergency_bypasses": { "today": 0, "this_week": 0, "last_reset": "2024-12-27" },
-  "milestone": { "current": 0, "name": "Clear Launch Blockers" }
+  "emergency_bypasses": { "today": 0, "this_week": 0, "last_reset": "2024-12-27" }
 }`
 		if err := os.WriteFile(statePath, []byte(stateContent), 0644); err != nil {
 			t.Fatalf("Failed to write state file: %v", err)

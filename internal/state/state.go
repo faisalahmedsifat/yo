@@ -11,13 +11,12 @@ import (
 // State represents the current state of the yo workspace
 type State struct {
 	Version           string            `json:"version"`
-	CurrentStage      string            `json:"current_stage"`      // none, red, yellow, green
+	CurrentStage      string            `json:"current_stage"` // none, red, yellow, green
 	CurrentTaskID     string            `json:"current_task_id"`
 	CurrentTaskRepo   string            `json:"current_task_repo"`
 	Timer             Timer             `json:"timer"`
 	Session           Session           `json:"session"`
 	EmergencyBypasses EmergencyBypasses `json:"emergency_bypasses"`
-	Milestone         Milestone         `json:"milestone"`
 }
 
 // Timer tracks the current task timer
@@ -50,12 +49,6 @@ type EmergencyBypasses struct {
 	LastReset string `json:"last_reset"`
 }
 
-// Milestone tracks progress through framework milestones
-type Milestone struct {
-	Current int    `json:"current"`
-	Name    string `json:"name"`
-}
-
 // NewState creates a new default state
 func NewState() *State {
 	return &State{
@@ -73,10 +66,6 @@ func NewState() *State {
 			Today:     0,
 			ThisWeek:  0,
 			LastReset: time.Now().Format("2006-01-02"),
-		},
-		Milestone: Milestone{
-			Current: 0,
-			Name:    "Clear Launch Blockers",
 		},
 	}
 }

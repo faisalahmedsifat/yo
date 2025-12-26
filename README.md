@@ -174,7 +174,6 @@ yo activity --week   # This week
 
 yo focus             # Focus score (on-task vs off-task)
 yo stats             # Weekly statistics
-yo milestone         # Track your progress
 ```
 
 ---
@@ -214,7 +213,6 @@ Logs when you're working on the wrong repo (off-task activity).
 | `yo activity` | Show activity |
 | `yo focus` | Show focus score |
 | `yo stats` | Weekly stats |
-| `yo milestone` | Progress milestones |
 | `yo config list` | Show config |
 | `yo watch` | Start file watcher |
 

@@ -51,10 +51,6 @@ func TestEndToEnd(t *testing.T) {
 
 	output = run("status")
 	assertContains(t, output, "NONE")
-
-	output = run("milestone")
-	assertContains(t, output, "Milestone 0")
-
 	// === PHASE 3: Simulate RED LIGHT ===
 	t.Log("Phase 3: Complete RED LIGHT")
 
@@ -146,7 +142,7 @@ Missing device testing
 	}
 
 	// Update state to red
-	stateContent := `{"version":"1.0.0","current_stage":"red","current_task_id":"login_button_e2e","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"},"milestone":{"current":0,"name":"Test"}}`
+	stateContent := `{"version":"1.0.0","current_stage":"red","current_task_id":"login_button_e2e","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"}}`
 	err = os.WriteFile(filepath.Join(yoDir, "state.json"), []byte(stateContent), 0644)
 	if err != nil {
 		t.Fatalf("Failed to write state: %v", err)
@@ -164,7 +160,7 @@ Missing device testing
 	t.Log("Phase 4: Start GREEN LIGHT")
 
 	// Update state to yellow first
-	stateContent = `{"version":"1.0.0","current_stage":"yellow","current_task_id":"login_button_e2e","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"},"milestone":{"current":0,"name":"Test"}}`
+	stateContent = `{"version":"1.0.0","current_stage":"yellow","current_task_id":"login_button_e2e","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"}}`
 	os.WriteFile(filepath.Join(yoDir, "state.json"), []byte(stateContent), 0644)
 
 	output = run("go", "--time", "2h")
@@ -448,7 +444,7 @@ Missing device coverage in test matrix
 	os.WriteFile(filepath.Join(yoDir, "current_task.md"), []byte(taskContent), 0644)
 
 	// Set state to red
-	stateContent := `{"version":"1.0.0","current_stage":"red","current_task_id":"mobile_login_fix","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"},"milestone":{"current":0,"name":"Clear Launch Blockers"}}`
+	stateContent := `{"version":"1.0.0","current_stage":"red","current_task_id":"mobile_login_fix","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"}}`
 	os.WriteFile(filepath.Join(yoDir, "state.json"), []byte(stateContent), 0644)
 
 	output = run("verify", "red")
@@ -460,7 +456,7 @@ Missing device coverage in test matrix
 	assertContains(t, output, "YELLOW LIGHT is complete")
 
 	// Update state to yellow
-	stateContent = `{"version":"1.0.0","current_stage":"yellow","current_task_id":"mobile_login_fix","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"},"milestone":{"current":0,"name":"Clear Launch Blockers"}}`
+	stateContent = `{"version":"1.0.0","current_stage":"yellow","current_task_id":"mobile_login_fix","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"}}`
 	os.WriteFile(filepath.Join(yoDir, "state.json"), []byte(stateContent), 0644)
 
 	// === STEP 7: yo go ===
@@ -484,7 +480,7 @@ Missing device coverage in test matrix
 	assertContains(t, output, "mobile_login_fix")
 
 	// Manually complete by setting state to none (simulates done without interactive prompts)
-	stateContent = `{"version":"1.0.0","current_stage":"none","current_task_id":"","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"},"milestone":{"current":0,"name":"Clear Launch Blockers"}}`
+	stateContent = `{"version":"1.0.0","current_stage":"none","current_task_id":"","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"}}`
 	os.WriteFile(filepath.Join(yoDir, "state.json"), []byte(stateContent), 0644)
 
 	output = run("status")
@@ -527,7 +523,7 @@ func TestDeferLogsTechDebt(t *testing.T) {
 	run("init")
 
 	// Set state to yellow (where tech debt decisions happen)
-	stateContent := `{"version":"1.0.0","current_stage":"yellow","current_task_id":"auth_feature","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"},"milestone":{"current":0,"name":"Test"}}`
+	stateContent := `{"version":"1.0.0","current_stage":"yellow","current_task_id":"auth_feature","timer":{},"session":{},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"}}`
 	os.WriteFile(filepath.Join(yoDir, "state.json"), []byte(stateContent), 0644)
 
 	// Log tech debt using quick mode

@@ -48,10 +48,6 @@ func TestNewState(t *testing.T) {
 	if s.Session.Active {
 		t.Error("Expected session to be inactive")
 	}
-
-	if s.Milestone.Current != 0 {
-		t.Errorf("Expected milestone 0, got %d", s.Milestone.Current)
-	}
 }
 
 func TestStateSaveLoad(t *testing.T) {
