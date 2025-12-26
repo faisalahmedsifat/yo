@@ -64,7 +64,7 @@ yo next
 ### 3. RED LIGHT - Define the problem
 
 ```bash
-yo red -i     # Interactive mode (recommended)
+yo red     # Interactive mode (recommended)
 ```
 
 **You must answer:**
@@ -79,7 +79,7 @@ yo verify red   # Check if complete
 ### 4. YELLOW LIGHT - Plan your solution
 
 ```bash
-yo yellow -i   # Interactive mode
+yo yellow   # Interactive mode
 ```
 
 **You must define:**
@@ -91,7 +91,7 @@ yo yellow -i   # Interactive mode
 **Log tech debt here:**
 ```bash
 yo defer "No OAuth - using password only for MVP"
-yo defer -i   # Interactive with more details
+yo defer   # Interactive with more details
 ```
 
 ```bash
@@ -105,14 +105,11 @@ yo go                # Uses estimated time from YELLOW
 yo go --time 2h      # Override time estimate
 ```
 
-**Now you can code.** Timer is running.
+**Now you can code.** Timer counts up automatically - goes past estimate if needed.
 
 ```bash
 yo status   # Current state + timer
 yo timer    # Timer only
-
-# Need more time?
-yo extend 30m "API was more complex"
 ```
 
 ### 6. Complete the task
@@ -139,7 +136,7 @@ Use `yo defer` during YELLOW LIGHT when you're choosing to skip something:
 
 ```bash
 yo defer "No retry button - users can click again"
-yo defer -i   # Interactive mode
+yo defer   # Interactive mode
 ```
 
 **Creates entries like:**
@@ -203,11 +200,10 @@ Logs when you're working on the wrong repo (off-task activity).
 |---------|-------------|
 | `yo init` | Initialize workspace |
 | `yo status` | Show current state |
-| `yo red -i` | Define problem (interactive) |
-| `yo yellow -i` | Plan solution (interactive) |
+| `yo red` | Define problem (interactive) |
+| `yo yellow` | Plan solution (interactive) |
 | `yo go` | Start GREEN LIGHT with timer |
 | `yo timer` | Show timer |
-| `yo extend 1h` | Add time to threshold |
 | `yo done` | Complete task |
 | `yo off` | End session |
 | `yo list` | Show backlog |
@@ -267,9 +263,9 @@ your-project/
 4. Feel bad
 
 ### After yo:
-1. See bug → `yo red -i`
+1. See bug → `yo red`
 2. Define exact problem, impact, severity
-3. Analyze root cause → `yo yellow -i`  
+3. Analyze root cause → `yo yellow`  
 4. Consider 3 options, pick one, define success criteria
 5. Log what you're skipping → `yo defer`
 6. Start timer → `yo go`

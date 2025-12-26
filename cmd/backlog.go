@@ -167,7 +167,7 @@ Examples:
 		reader := bufio.NewReader(os.Stdin)
 		response, _ := reader.ReadString('\n')
 		if strings.TrimSpace(strings.ToLower(response)) == "y" {
-			fmt.Println("  Start with: yo red -i")
+			fmt.Println("  Start with: yo red")
 		}
 
 		return nil
@@ -269,8 +269,8 @@ var nextCmd = &cobra.Command{
 		fmt.Println()
 		fmt.Println("  Next steps:")
 		fmt.Println("    1. Edit .yo/current_task.md to complete RED LIGHT")
-		fmt.Println("    2. Or run: yo red -i  (interactive mode)")
-		fmt.Println("    3. Then: yo yellow -i  (plan your solution)")
+		fmt.Println("    2. Or run: yo red  (interactive mode)")
+		fmt.Println("    3. Then: yo yellow  (plan your solution)")
 
 		return nil
 	},

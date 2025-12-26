@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	yellowInteractive bool
+	yellowEdit bool
 )
 
 var yellowCmd = &cobra.Command{
@@ -26,7 +26,8 @@ Before executing, you must:
   - Choose one with rationale
   - Define success criteria
 
-Use -i for interactive mode with guided prompts.`,
+By default, runs in interactive mode with guided prompts.
+Use -e to open the editor directly.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !workspace.IsInitialized() {
 			return fmt.Errorf("workspace not initialized. Run 'yo init' first")
@@ -39,7 +40,7 @@ Use -i for interactive mode with guided prompts.`,
 
 		// Check stage
 		if s.CurrentStage == "none" || s.CurrentStage == "" {
-			return fmt.Errorf("complete RED LIGHT first. Run 'yo red -i'")
+			return fmt.Errorf("complete RED LIGHT first. Run 'yo red'")
 		}
 
 		if s.CurrentStage == "green" {
@@ -51,33 +52,34 @@ Use -i for interactive mode with guided prompts.`,
 			return err
 		}
 
-		if yellowInteractive {
-			return runYellowInteractive(taskPath, s)
+		if yellowEdit {
+			// Open editor
+			fmt.Println("🟡 Opening current_task.md for YELLOW LIGHT...")
+			fmt.Println("   Fill in the analysis and planning section.")
+			fmt.Println()
+
+			if err := openEditor(taskPath); err != nil {
+				return fmt.Errorf("failed to open editor: %w", err)
+			}
+
+			// Update state
+			oldStage := s.CurrentStage
+			s.SetStage("yellow")
+			if err := s.Save(); err != nil {
+				return err
+			}
+
+			// Log stage change
+			activity.LogStageChange(oldStage, "yellow", s.CurrentTaskID)
+
+			fmt.Println()
+			fmt.Println("✅ YELLOW LIGHT started!")
+			fmt.Println("   Next: yo go  (start execution)")
+			return nil
 		}
 
-		// Open editor
-		fmt.Println("🟡 Opening current_task.md for YELLOW LIGHT...")
-		fmt.Println("   Fill in the analysis and planning section.")
-		fmt.Println()
-
-		if err := openEditor(taskPath); err != nil {
-			return fmt.Errorf("failed to open editor: %w", err)
-		}
-
-		// Update state
-		oldStage := s.CurrentStage
-		s.SetStage("yellow")
-		if err := s.Save(); err != nil {
-			return err
-		}
-
-		// Log stage change
-		activity.LogStageChange(oldStage, "yellow", s.CurrentTaskID)
-
-		fmt.Println()
-		fmt.Println("✅ YELLOW LIGHT started!")
-		fmt.Println("   Next: yo verify yellow  (validate your plan)")
-		return nil
+		// Default: Interactive mode
+		return runYellowInteractive(taskPath, s)
 	},
 }
 
@@ -263,6 +265,6 @@ func runYellowInteractive(taskPath string, s *state.State) error {
 }
 
 func init() {
-	yellowCmd.Flags().BoolVarP(&yellowInteractive, "interactive", "i", false, "Interactive mode with guided prompts")
+	yellowCmd.Flags().BoolVarP(&yellowEdit, "edit", "e", false, "Open in editor instead of interactive mode")
 	rootCmd.AddCommand(yellowCmd)
 }

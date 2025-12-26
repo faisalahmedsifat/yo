@@ -297,7 +297,7 @@ func assertFileExists(t *testing.T, path string) {
 }
 
 // TestCompleteWorkflow tests the full workflow:
-// init → add → list → next → red → yellow → go → extend → done
+// init → add → list → next → red → yellow → go → timer → done
 func TestCompleteWorkflow(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "yo-complete-workflow-*")
 	if err != nil {
@@ -470,17 +470,11 @@ Missing device coverage in test matrix
 	assertContains(t, output, "Timer is running")
 	assertContains(t, output, "Threshold")
 
-	// === STEP 8: yo extend ===
-	t.Log("Step 8: yo extend")
-	output = run("extend", "30m", "API was more complex")
-	assertContains(t, output, "Timer Extended")
-	assertContains(t, output, "+30m")
-	assertContains(t, output, "yo defer") // Suggests using defer for tech debt
-
-	// Check timer after extend
+	// Check timer
+	t.Log("Step 8: yo timer")
 	output = run("timer")
 	assertContains(t, output, "Timer")
-	assertContains(t, output, "Extensions: 1")
+	assertContains(t, output, "Elapsed")
 
 	// === STEP 9: yo done (simulate) ===
 	t.Log("Step 9: yo done (simulate completion)")
@@ -550,54 +544,4 @@ func TestDeferLogsTechDebt(t *testing.T) {
 	assertContains(t, techDebtStr, "No OAuth support")
 	assertContains(t, techDebtStr, "auth_feature")
 	assertContains(t, techDebtStr, "Deferred on")
-}
-
-// TestExtendDoesNotLogTechDebt verifies extend command no longer logs to tech debt
-func TestExtendDoesNotLogTechDebt(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "yo-extend-no-debt-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	yoBinary := filepath.Join(tmpDir, "yo")
-	buildCmd := exec.Command("go", "build", "-o", yoBinary, ".")
-	buildCmd.Dir = getProjectRoot(t)
-	if output, err := buildCmd.CombinedOutput(); err != nil {
-		t.Fatalf("Failed to build yo: %v\n%s", err, output)
-	}
-
-	run := func(args ...string) string {
-		cmd := exec.Command(yoBinary, args...)
-		cmd.Dir = tmpDir
-		output, _ := cmd.CombinedOutput()
-		return string(output)
-	}
-
-	yoDir := filepath.Join(tmpDir, ".yo")
-
-	// Initialize
-	run("init")
-
-	// Set state to green with active timer
-	stateContent := `{"version":"1.0.0","current_stage":"green","current_task_id":"test_task","timer":{"started_at":"2024-12-27T00:00:00Z","estimated_hours":1,"threshold_hours":1},"session":{"active":true,"started_at":"2024-12-27T00:00:00Z"},"emergency_bypasses":{"today":0,"this_week":0,"last_reset":"2024-12-27"},"milestone":{"current":0,"name":"Test"}}`
-	os.WriteFile(filepath.Join(yoDir, "state.json"), []byte(stateContent), 0644)
-
-	// Extend timer
-	output := run("extend", "45m", "API took longer")
-	assertContains(t, output, "Timer Extended")
-	assertContains(t, output, "+45m")
-	assertContains(t, output, "yo defer") // Should suggest using defer for tech debt
-
-	// Verify tech debt log was NOT updated with timer extension
-	techDebt, _ := os.ReadFile(filepath.Join(yoDir, "tech_debt_log.md"))
-	techDebtStr := string(techDebt)
-
-	// Should NOT contain timer extension stuff
-	if strings.Contains(techDebtStr, "Timer Extension") {
-		t.Error("Tech debt log should NOT contain Timer Extension entries")
-	}
-	if strings.Contains(techDebtStr, "API took longer") {
-		t.Error("Tech debt log should NOT contain extend reasons")
-	}
 }

@@ -47,7 +47,7 @@ func verifyRed(taskPath string) error {
 
 	if result.Valid {
 		fmt.Println("✅ RED LIGHT is complete!")
-		fmt.Println("   Next: yo yellow -i  (analyze and plan)")
+		fmt.Println("   Next: yo yellow  (analyze and plan)")
 		return nil
 	}
 
@@ -56,7 +56,7 @@ func verifyRed(taskPath string) error {
 		fmt.Printf("   - %s: %s\n", e.Field, e.Message)
 	}
 	fmt.Println()
-	fmt.Println("   Fix these issues with: yo red -i")
+	fmt.Println("   Fix these issues with: yo red")
 	return fmt.Errorf("validation failed")
 }
 
@@ -77,7 +77,7 @@ func verifyYellow(taskPath string) error {
 		fmt.Printf("   - %s: %s\n", e.Field, e.Message)
 	}
 	fmt.Println()
-	fmt.Println("   Fix these issues with: yo yellow -i")
+	fmt.Println("   Fix these issues with: yo yellow")
 	return fmt.Errorf("validation failed")
 }
 

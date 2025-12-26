@@ -48,7 +48,7 @@ Use --time to override the estimated time.`,
 		}
 
 		if s.CurrentStage == "none" || s.CurrentStage == "" {
-			return fmt.Errorf("complete RED and YELLOW first. Run 'yo red -i'")
+			return fmt.Errorf("complete RED and YELLOW first. Run 'yo red'")
 		}
 
 		taskPath, err := workspace.GetCurrentTaskPath()

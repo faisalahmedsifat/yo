@@ -101,10 +101,10 @@ func printStatus(s *state.State) {
 	// Next actions
 	switch s.CurrentStage {
 	case "none":
-		fmt.Println("  Next: yo red -i  (define a problem)")
+		fmt.Println("  Next: yo red  (define a problem)")
 	case "red":
 		fmt.Println("  Next: yo verify red  (validate problem definition)")
-		fmt.Println("        yo yellow -i   (analyze and plan)")
+		fmt.Println("        yo yellow   (analyze and plan)")
 	case "yellow":
 		fmt.Println("  Next: yo verify yellow  (validate plan)")
 		fmt.Println("        yo go            (start execution)")

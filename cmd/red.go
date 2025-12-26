@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	redInteractive bool
+	redEdit bool
 )
 
 var redCmd = &cobra.Command{
@@ -26,7 +26,8 @@ Before writing any code, you must clearly define:
   - What is the impact?
   - What is the severity (P0-P3)?
 
-Use -i for interactive mode with guided prompts.`,
+By default, runs in interactive mode with guided prompts.
+Use -e to open the editor directly.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !workspace.IsInitialized() {
 			return fmt.Errorf("workspace not initialized. Run 'yo init' first")
@@ -50,33 +51,34 @@ Use -i for interactive mode with guided prompts.`,
 			return err
 		}
 
-		if redInteractive {
-			return runRedInteractive(taskPath, s)
+		if redEdit {
+			// Open editor
+			fmt.Println("🔴 Opening current_task.md for RED LIGHT...")
+			fmt.Println("   Fill in the problem definition, then save and close.")
+			fmt.Println()
+
+			if err := openEditor(taskPath); err != nil {
+				return fmt.Errorf("failed to open editor: %w", err)
+			}
+
+			// Update state
+			oldStage := s.CurrentStage
+			s.SetStage("red")
+			if err := s.Save(); err != nil {
+				return err
+			}
+
+			// Log stage change
+			activity.LogStageChange(oldStage, "red", s.CurrentTaskID)
+
+			fmt.Println()
+			fmt.Println("✅ RED LIGHT started!")
+			fmt.Println("   Next: yo yellow  (analyze and plan)")
+			return nil
 		}
 
-		// Open editor
-		fmt.Println("🔴 Opening current_task.md for RED LIGHT...")
-		fmt.Println("   Fill in the problem definition, then save and close.")
-		fmt.Println()
-
-		if err := openEditor(taskPath); err != nil {
-			return fmt.Errorf("failed to open editor: %w", err)
-		}
-
-		// Update state
-		oldStage := s.CurrentStage
-		s.SetStage("red")
-		if err := s.Save(); err != nil {
-			return err
-		}
-
-		// Log stage change
-		activity.LogStageChange(oldStage, "red", s.CurrentTaskID)
-
-		fmt.Println()
-		fmt.Println("✅ RED LIGHT started!")
-		fmt.Println("   Next: yo verify red  (validate your problem definition)")
-		return nil
+		// Default: Interactive mode
+		return runRedInteractive(taskPath, s)
 	},
 }
 
@@ -238,6 +240,6 @@ func promptConfirm(question string) bool {
 }
 
 func init() {
-	redCmd.Flags().BoolVarP(&redInteractive, "interactive", "i", false, "Interactive mode with guided prompts")
+	redCmd.Flags().BoolVarP(&redEdit, "edit", "e", false, "Open in editor instead of interactive mode")
 	rootCmd.AddCommand(redCmd)
 }

@@ -32,7 +32,7 @@ var initCmd = &cobra.Command{
 		fmt.Println("  📊 activity.jsonl   - Activity log")
 		fmt.Println("")
 		fmt.Println("Get started with:")
-		fmt.Println("  yo red -i    # Define your first problem")
+		fmt.Println("  yo red    # Define your first problem")
 		return nil
 	},
 }
